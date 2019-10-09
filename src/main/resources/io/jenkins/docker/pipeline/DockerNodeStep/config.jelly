@@ -19,6 +19,8 @@
         <c:select/>
       </f:entry>
 
+	  <f:property field="dockerTemplateBase"/>
+
   </f:advanced>
 
 </j:jelly>

@@ -26,6 +26,8 @@ import org.kohsuke.stapler.QueryParameter;
 import javax.annotation.Nonnull;
 import java.util.Set;
 
+import com.nirima.jenkins.plugins.docker.DockerTemplateBase;
+
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
@@ -40,6 +42,8 @@ public class DockerNodeStep extends Step {
     private String remoteFs;
 
     private DockerComputerConnector connector;
+
+    private DockerTemplateBase dockerTemplateBase;
 
     @DataBoundConstructor
     public DockerNodeStep(String image) {
@@ -81,14 +85,26 @@ public class DockerNodeStep extends Step {
         return connector;
     }
 
-    @DataBoundSetter // TODO this is not mentioned in config.jelly
+    @DataBoundSetter
     public void setConnector(DockerComputerConnector connector) {
         this.connector = connector;
     }
 
+    public DockerTemplateBase getDockerTemplateBase() {
+        return dockerTemplateBase;
+    }
+
+    @DataBoundSetter // TODO this is not mentioned in config.jelly
+    public void setDockerTemplateBase(DockerTemplateBase dockerTemplateBase) {
+        this.dockerTemplateBase = dockerTemplateBase;
+    }
+
     @Override
     public StepExecution start(StepContext context) throws Exception {
-        return new DockerNodeStepExecution(context, connector, dockerHost, credentialsId, image, remoteFs);
+        if (dockerTemplateBase != null)
+            return new DockerNodeStepExecution(context, connector, dockerHost, credentialsId, dockerTemplateBase, remoteFs);
+        else
+            return new DockerNodeStepExecution(context, connector, dockerHost, credentialsId, image, remoteFs);
     }
 
     @Extension(optional = true)

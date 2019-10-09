@@ -275,6 +275,21 @@ public class DockerNodeStepTest {
         });
     }
 
+    @Test
+    public void dockerTemplateBase() throws Exception {
+        story.addStep(new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+                WorkflowJob j = story.j.jenkins.createProject(WorkflowJob.class, "dockerTemplateBase");
+                j.setDefinition(new CpsFlowDefinition("dockerNode(dockerHost: 'unix:///var/run/docker.sock', dockerTemplateBase: [$class: 'DockerTemplateBase', image: 'jenkins/slave'], remoteFs: '/home/jenkins') {\n" +
+                        "  sh 'echo \"hello via dockerTemplateBase\"'\n" +
+                        "}\n", true));
+                WorkflowRun r = story.j.buildAndAssertSuccess(j);
+                story.j.assertLogContains("hello via dockerTemplateBase", r);
+            }
+        });
+    }
+
     public static class PathModifierStep extends Step {
         private String element;
 

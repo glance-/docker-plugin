@@ -39,6 +39,7 @@ class DockerNodeStepExecution extends StepExecution {
     private final DockerComputerConnector connector;
     private transient volatile CompletableFuture<DockerTransientNode> task;
     private volatile String nodeName;
+    private DockerTemplateBase dockerTemplateBase;
 
     public DockerNodeStepExecution(StepContext context, DockerComputerConnector connector, String dockerHost, String credentialsId, String image, String remoteFs) {
         super(context);
@@ -47,6 +48,12 @@ class DockerNodeStepExecution extends StepExecution {
         this.credentialsId = credentialsId;
         this.image = image;
         this.remoteFs = remoteFs;
+        this.dockerTemplateBase = null;
+    }
+
+    public DockerNodeStepExecution(StepContext context, DockerComputerConnector connector, String dockerHost, String credentialsId, DockerTemplateBase dockerTemplateBase, String remoteFs) {
+        this(context, connector, dockerHost, credentialsId, "dockerTemplateBase", remoteFs);
+        this.dockerTemplateBase = dockerTemplateBase;
     }
 
     @Override
@@ -74,8 +81,11 @@ class DockerNodeStepExecution extends StepExecution {
 
         final String uuid = UUID.randomUUID().toString();
 
+        if (dockerTemplateBase == null)
+            dockerTemplateBase = new DockerTemplateBase(image);
+
         final DockerTemplate t = new DockerTemplate(
-                new DockerTemplateBase(image),
+                dockerTemplateBase,
                 connector,
                 uuid, remoteFs, "1");
 
